@@ -3,6 +3,10 @@
 This package provides a *very simple* OAuth 2.0 endpoint for the [Restify][] framework. In particular, it implements
 the [Client Credentials][cc] and [Resource Owner Password Credentials][ropc] flows only.
 
+In this fork on invalid credentials in ROCP flow a 400 Bad Request will be sent instead of a 401 with WWW-Authenticate header.
+This should be according to the [specs](https://tools.ietf.org/html/rfc6749#section-5.2) and avoid a Authentification-Dialog
+in the browser.
+
 ## What You Get
 
 If you provide Restify–OAuth2 with the appropriate hooks, it will:
@@ -12,8 +16,9 @@ If you provide Restify–OAuth2 with the appropriate hooks, it will:
 * For all other resources, when an access token is [sent via the `Authorization` header][send-token], it will validate
   it:
   * If the token fails validation, it will send [an appropriate 400 or 401 error response][token-usage-error], with a
-    [`WWW-Authenticate`][www-authenticate] header and a [`Link`][web-linking] [`rel="oauth2-token"`][oauth2-token-rel]
-    header pointing to the token endpoint.
+    [`Link`][web-linking] [`rel="oauth2-token"`][oauth2-token-rel]
+    header pointing to the token endpoint. It will not send an [`WWW-Authenticate`][www-authenticate] header on invalid
+    credentials but will reply with a 400 Bad Request as specified in RFC 6749 section 5.2.
   * Otherwise, you can use your `authenticateToken` and `grantScopes` hooks to set properties on the request object for
     your routes to check later.
 * If no access token is sent, it ensures that `req.username` is set to `null`; furthermore, none of your hooks are
